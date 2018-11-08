@@ -33,9 +33,9 @@ public class RotateGestureDetector extends TwoFingerGestureDetector {
 	 * @see RotateGestureDetector.SimpleOnRotateGestureListener
 	 */
 	public interface OnRotateGestureListener {
-		public boolean onRotate(RotateGestureDetector detector);
-		public boolean onRotateBegin(RotateGestureDetector detector);
-		public void onRotateEnd(RotateGestureDetector detector);
+		boolean onRotate(RotateGestureDetector detector);
+		boolean onRotateBegin(RotateGestureDetector detector);
+		void onRotateEnd(RotateGestureDetector detector);
 	}
 	
 	/**
@@ -56,7 +56,6 @@ public class RotateGestureDetector extends TwoFingerGestureDetector {
 	    	// Do nothing, overridden implementation may be used
 	    }
 	}
-
     
     private final OnRotateGestureListener mListener;
     private boolean mSloppyGesture;
@@ -67,7 +66,7 @@ public class RotateGestureDetector extends TwoFingerGestureDetector {
     }
 
     @Override
-    protected void handleStartProgressEvent(int actionCode, MotionEvent event){
+    protected void handleStartProgressEvent(int actionCode, MotionEvent event) {
         switch (actionCode) {
             case MotionEvent.ACTION_POINTER_DOWN:
                 // At least the second finger is on screen now
@@ -80,7 +79,7 @@ public class RotateGestureDetector extends TwoFingerGestureDetector {
                 
                 // See if we have a sloppy gesture
                 mSloppyGesture = isSloppyGesture(event);
-                if(!mSloppyGesture){
+                if (!mSloppyGesture) {
                 	// No, start gesture now
                     mGestureInProgress = mListener.onRotateBegin(this);
                 } 
@@ -93,7 +92,7 @@ public class RotateGestureDetector extends TwoFingerGestureDetector {
                 
                 // See if we still have a sloppy gesture
                 mSloppyGesture = isSloppyGesture(event);
-                if(!mSloppyGesture){
+                if (!mSloppyGesture) {
                 	// No, start normal gesture now
                     mGestureInProgress = mListener.onRotateBegin(this);
                 }
@@ -109,9 +108,8 @@ public class RotateGestureDetector extends TwoFingerGestureDetector {
         }
     }
 
-    
     @Override
-    protected void handleInProgressEvent(int actionCode, MotionEvent event){ 	
+    protected void handleInProgressEvent(int actionCode, MotionEvent event) {
         switch (actionCode) {
             case MotionEvent.ACTION_POINTER_UP:
                 // Gesture ended but 
@@ -154,7 +152,6 @@ public class RotateGestureDetector extends TwoFingerGestureDetector {
         super.resetState();
         mSloppyGesture = false;
     }
-
 
     /**
      * Return the rotation difference from the previous rotate event to the current

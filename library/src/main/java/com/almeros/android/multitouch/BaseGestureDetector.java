@@ -33,8 +33,7 @@ public abstract class BaseGestureDetector {
     protected float mCurrPressure;
     protected float mPrevPressure;
     protected long mTimeDelta;
-    
-    
+
 	/**
 	 * This value is the threshold ratio between the previous combined pressure
 	 * and the current combined pressure. When pressure decreases rapidly
@@ -43,7 +42,6 @@ public abstract class BaseGestureDetector {
 	 * device. This value was tuned experimentally.
 	 */
     protected static final float PRESSURE_THRESHOLD = 0.67f;
-
     
     public BaseGestureDetector(Context context) {
     	mContext = context; 	
@@ -58,7 +56,7 @@ public abstract class BaseGestureDetector {
 	 * @param event
 	 * @return
 	 */
-    public boolean onTouchEvent(MotionEvent event){
+    public boolean onTouchEvent(MotionEvent event) {
     	final int actionCode = event.getAction() & MotionEvent.ACTION_MASK;
     	if (!mGestureInProgress) {
     		handleStartProgressEvent(actionCode, event);
@@ -85,9 +83,8 @@ public abstract class BaseGestureDetector {
 	 * @param event
 	 */
     protected abstract void handleInProgressEvent(int actionCode, MotionEvent event);
-    
-    
-    protected void updateStateByEvent(MotionEvent curr){
+
+    protected void updateStateByEvent(MotionEvent curr) {
     	final MotionEvent prev = mPrevEvent;
     	
     	// Reset mCurrEvent
@@ -96,8 +93,7 @@ public abstract class BaseGestureDetector {
             mCurrEvent = null;
         }
         mCurrEvent = MotionEvent.obtain(curr);
-        
-        
+
         // Delta time
         mTimeDelta = curr.getEventTime() - prev.getEventTime();
 
@@ -117,7 +113,6 @@ public abstract class BaseGestureDetector {
         }
         mGestureInProgress = false;
     }
-
 
     /**
      * Returns {@code true} if a gesture is currently in progress.
@@ -146,5 +141,4 @@ public abstract class BaseGestureDetector {
 	public long getEventTime() {
 		return mCurrEvent.getEventTime();
 	}
-   
 }

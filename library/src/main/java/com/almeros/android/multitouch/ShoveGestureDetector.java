@@ -34,9 +34,9 @@ public class ShoveGestureDetector extends TwoFingerGestureDetector {
 	 * @see ShoveGestureDetector.SimpleOnShoveGestureListener
 	 */
 	public interface OnShoveGestureListener {
-		public boolean onShove(ShoveGestureDetector detector);
-		public boolean onShoveBegin(ShoveGestureDetector detector);
-		public void onShoveEnd(ShoveGestureDetector detector);
+		boolean onShove(ShoveGestureDetector detector);
+		boolean onShoveBegin(ShoveGestureDetector detector);
+		void onShoveEnd(ShoveGestureDetector detector);
 	}
 	
 	/**
@@ -70,7 +70,7 @@ public class ShoveGestureDetector extends TwoFingerGestureDetector {
     }
 
     @Override
-    protected void handleStartProgressEvent(int actionCode, MotionEvent event){
+    protected void handleStartProgressEvent(int actionCode, MotionEvent event) {
         switch (actionCode) {
             case MotionEvent.ACTION_POINTER_DOWN:
                 // At least the second finger is on screen now
@@ -83,7 +83,7 @@ public class ShoveGestureDetector extends TwoFingerGestureDetector {
                 
                 // See if we have a sloppy gesture
                 mSloppyGesture = isSloppyGesture(event);
-                if(!mSloppyGesture){
+                if (!mSloppyGesture) {
                 	// No, start gesture now
                     mGestureInProgress = mListener.onShoveBegin(this);
                 } 
@@ -93,10 +93,12 @@ public class ShoveGestureDetector extends TwoFingerGestureDetector {
                 if (!mSloppyGesture) {
                 	break;
                 }
+
+                updateStateByEvent(event);
                 
                 // See if we still have a sloppy gesture
                 mSloppyGesture = isSloppyGesture(event);
-                if(!mSloppyGesture){
+                if (!mSloppyGesture) {
                 	// No, start normal gesture now
                     mGestureInProgress = mListener.onShoveBegin(this);
                 }
@@ -107,14 +109,13 @@ public class ShoveGestureDetector extends TwoFingerGestureDetector {
                 if (!mSloppyGesture) {
                 	break;
                 }
-           
-                break; 
+                resetState();
+                break;
         }
     }
 
-    
     @Override
-    protected void handleInProgressEvent(int actionCode, MotionEvent event){ 	
+    protected void handleInProgressEvent(int actionCode, MotionEvent event) {
         switch (actionCode) {
             case MotionEvent.ACTION_POINTER_UP:
                 // Gesture ended but 
@@ -162,7 +163,7 @@ public class ShoveGestureDetector extends TwoFingerGestureDetector {
     }
     
     @Override
-    protected void updateStateByEvent(MotionEvent curr){
+    protected void updateStateByEvent(MotionEvent curr) {
 		super.updateStateByEvent(curr);
 		
 		final MotionEvent prev = mPrevEvent;
@@ -176,19 +177,19 @@ public class ShoveGestureDetector extends TwoFingerGestureDetector {
 	}
     
     @Override
-    protected boolean isSloppyGesture(MotionEvent event){
+    protected boolean isSloppyGesture(MotionEvent event) {
     	boolean sloppy = super.isSloppyGesture(event);
-    	if (sloppy)
-    		return true;
+    	if (sloppy) {
+            return true;
+        }
     	
     	// If it's not traditionally sloppy, we check if the angle between fingers
     	// is acceptable.
     	double angle = Math.abs(Math.atan2(mCurrFingerDiffY, mCurrFingerDiffX));
     	//about 20 degrees, left or right
     	return !(( 0.0f < angle && angle < 0.35f)
-    			|| 2.79f < angle && angle < Math.PI); 
+    			|| 2.79f < angle && angle < Math.PI);
     }
-
 
     /**
      * Return the distance in pixels from the previous shove event to the current

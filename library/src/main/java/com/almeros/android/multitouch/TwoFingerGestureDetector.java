@@ -2,7 +2,6 @@ package com.almeros.android.multitouch;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
-import android.util.FloatMath;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
@@ -53,7 +52,7 @@ public abstract class TwoFingerGestureDetector extends BaseGestureDetector {
 	@Override
 	protected abstract void handleInProgressEvent(int actionCode, MotionEvent event);
 	
-	protected void updateStateByEvent(MotionEvent curr){
+	protected void updateStateByEvent(MotionEvent curr) {
 		super.updateStateByEvent(curr);
 		
 		final MotionEvent prev = mPrevEvent;
@@ -92,7 +91,7 @@ public abstract class TwoFingerGestureDetector extends BaseGestureDetector {
         if (mCurrLen == -1) {
             final float cvx = mCurrFingerDiffX;
             final float cvy = mCurrFingerDiffY;
-            mCurrLen = FloatMath.sqrt(cvx*cvx + cvy*cvy);
+            mCurrLen = (float) Math.sqrt(cvx*cvx + cvy*cvy);
         }
         return mCurrLen;
     }
@@ -107,7 +106,7 @@ public abstract class TwoFingerGestureDetector extends BaseGestureDetector {
         if (mPrevLen == -1) {
             final float pvx = mPrevFingerDiffX;
             final float pvy = mPrevFingerDiffY;
-            mPrevLen = FloatMath.sqrt(pvx*pvx + pvy*pvy);
+            mPrevLen = (float) Math.sqrt(pvx*pvx + pvy*pvy);
         }
         return mPrevLen;
     }
@@ -120,7 +119,7 @@ public abstract class TwoFingerGestureDetector extends BaseGestureDetector {
      */
     protected static float getRawX(MotionEvent event, int pointerIndex) {
         float offset = event.getX() - event.getRawX();
-        if(pointerIndex < event.getPointerCount()){
+        if (pointerIndex < event.getPointerCount()) {
         	return event.getX(pointerIndex) + offset;
         } 
         return 0f;
@@ -147,7 +146,7 @@ public abstract class TwoFingerGestureDetector extends BaseGestureDetector {
 	 * @param event
 	 * @return
 	 */
-    protected boolean isSloppyGesture(MotionEvent event){
+    protected boolean isSloppyGesture(MotionEvent event) {
         // As orientation can change, query the metrics in touch down
         DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
         mRightSlopEdge = metrics.widthPixels - mEdgeSlop;
@@ -175,6 +174,5 @@ public abstract class TwoFingerGestureDetector extends BaseGestureDetector {
         	 return true;
         } 
         return false;
-    }    
-
+    }
 }

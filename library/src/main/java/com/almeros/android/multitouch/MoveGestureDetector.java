@@ -3,7 +3,6 @@ package com.almeros.android.multitouch;
 import android.content.Context;
 import android.graphics.PointF;
 import android.view.MotionEvent;
-import com.almeros.android.multitouch.BaseGestureDetector;
 
 /**
  * @author Almer Thie (code.almeros.com)
@@ -35,9 +34,9 @@ public class MoveGestureDetector extends BaseGestureDetector {
 	 * @see MoveGestureDetector.SimpleOnMoveGestureListener
 	 */
 	public interface OnMoveGestureListener {
-		public boolean onMove(MoveGestureDetector detector);
-		public boolean onMoveBegin(MoveGestureDetector detector);
-		public void onMoveEnd(MoveGestureDetector detector);
+		boolean onMove(MoveGestureDetector detector);
+		boolean onMoveBegin(MoveGestureDetector detector);
+		void onMoveEnd(MoveGestureDetector detector);
 	}
 	
 	/**
@@ -63,11 +62,8 @@ public class MoveGestureDetector extends BaseGestureDetector {
     
     private final OnMoveGestureListener mListener;
     
-    private PointF mCurrFocusInternal;
-    private PointF mPrevFocusInternal;  
     private PointF mFocusExternal = new PointF();
     private PointF mFocusDeltaExternal = new PointF();
-    
 
     public MoveGestureDetector(Context context, OnMoveGestureListener listener) {
     	super(context);
@@ -77,7 +73,7 @@ public class MoveGestureDetector extends BaseGestureDetector {
     @Override
     protected void handleStartProgressEvent(int actionCode, MotionEvent event){
         switch (actionCode) { 
-            case MotionEvent.ACTION_DOWN: 
+            case MotionEvent.ACTION_DOWN:
                 resetState(); // In case we missed an UP/CANCEL event
                 
                 mPrevEvent = MotionEvent.obtain(event);
@@ -95,6 +91,16 @@ public class MoveGestureDetector extends BaseGestureDetector {
     @Override
     protected void handleInProgressEvent(int actionCode, MotionEvent event){ 	
         switch (actionCode) {
+            case MotionEvent.ACTION_POINTER_UP:
+                resetState(); // In case we missed an UP/CANCEL event
+
+                mPrevEvent = MotionEvent.obtain(event);
+                mTimeDelta = 0;
+
+                updateStateByEvent(event);
+                break;
+
+            case MotionEvent.ACTION_POINTER_DOWN:
         	case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 mListener.onMoveEnd(this);
@@ -102,10 +108,13 @@ public class MoveGestureDetector extends BaseGestureDetector {
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                // If the gesture started before this detector was attached (somehow), 
-		// mPrevEvent will be null at this point and BaseGestureDetector's 
-		// updateStateByEvent() will crash. The following check will prevent this.
+                // If the gesture started before this detector was attached (somehow),
+                // mPrevEvent will be null at this point and BaseGestureDetector's
+                // updateStateByEvent() will crash. The following check will prevent this.
                 if (mPrevEvent == null) {
+                    return;
+                }
+                if (event.getPointerCount() > 1) {
                     return;
                 }
                 updateStateByEvent(event);
@@ -123,20 +132,21 @@ public class MoveGestureDetector extends BaseGestureDetector {
                 break;
         }
 	}
-    
+
+	@Override
     protected void updateStateByEvent(MotionEvent curr) {
     	super.updateStateByEvent(curr);
 
     	final MotionEvent prev = mPrevEvent;
     	
-        // Focus intenal
-        mCurrFocusInternal = determineFocalPoint(curr);
-        mPrevFocusInternal = determineFocalPoint(prev);
+        // Focus internal
+        PointF currFocusInternal = determineFocalPoint(curr);
+        PointF prevFocusInternal = determineFocalPoint(prev);
         
         // Focus external
         // - Prevent skipping of focus delta when a finger is added or removed
         boolean mSkipNextMoveEvent = prev.getPointerCount() != curr.getPointerCount();
-        mFocusDeltaExternal = mSkipNextMoveEvent ? FOCUS_DELTA_ZERO : new PointF(mCurrFocusInternal.x - mPrevFocusInternal.x,  mCurrFocusInternal.y - mPrevFocusInternal.y);
+        mFocusDeltaExternal = mSkipNextMoveEvent ? FOCUS_DELTA_ZERO : new PointF(currFocusInternal.x - prevFocusInternal.x,  currFocusInternal.y - prevFocusInternal.y);
         
         // - Don't directly use mFocusInternal (or skipping will occur). Add 
         // 	 unskipped delta values to mFocusExternal instead.
@@ -144,20 +154,27 @@ public class MoveGestureDetector extends BaseGestureDetector {
         mFocusExternal.y += mFocusDeltaExternal.y;        
     }
 
-	/**
+    @Override
+    protected void resetState() {
+        super.resetState();
+        mFocusExternal = new PointF();
+        mFocusDeltaExternal = new PointF();
+    }
+
+    /**
 	 * Determine (multi)finger focal point (a.k.a. center point between all
 	 * fingers)
 	 * 
-	 * @param MotionEvent e
+	 * @param e MotionEvent
 	 * @return PointF focal point
 	 */
-    private PointF determineFocalPoint(MotionEvent e){
+    private PointF determineFocalPoint(MotionEvent e) {
     	// Number of fingers on screen
         final int pCount = e.getPointerCount(); 
         float x = 0f;
         float y = 0f;
         
-        for(int i = 0; i < pCount; i++){
+        for (int i = 0; i < pCount; i++) {
         	x += e.getX(i);
         	y += e.getY(i);
         }
@@ -176,5 +193,4 @@ public class MoveGestureDetector extends BaseGestureDetector {
     public PointF getFocusDelta() {
 		return mFocusDeltaExternal;
     }
-
 }
